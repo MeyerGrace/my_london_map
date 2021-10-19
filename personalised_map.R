@@ -1,19 +1,33 @@
 library(osmdata)
 library(sf)
 library(ggplot2)
+library(ggmap)
 
 # general london boundary box
 bbx <- getbb("London, UK")
+bbx <- getbb("Oval, London, UK")
+bbx <- getbb("London Borough of Lambeth, UK")
+
+#test the bb size with ggmap
+my_map <- get_map(bbx, maptype = "toner-background")
+ggmap(my_map)
 
 #If you want to make your own boundry box
--0.13, 51.51, -0.11, 51.52
-min_lon <- -0.510375; max_lon <--0.099715 
-min_lat <- 51.286760; max_lat <- 51.476302
-bbx <- rbind(x = c(min_lon, max_lon),y = c(min_lat,max_lat))
-colnames(bbx) <- c("min","max")
+# -0.13, 51.51, -0.11, 51.52
+# min_lon <- -0.510375; max_lon <--0.099715 
+# min_lat <- 51.286760; max_lat <- 51.476302
+# bbx <- rbind(x = c(min_lon, max_lon),y = c(min_lat,max_lat))
+# colnames(bbx) <- c("min","max")
 
 
 available_tags("highway")
+
+highways <- bbx %>%
+  opq()%>%
+  add_osm_feature(key = "highway", 
+                  value=c("primary","secondary", 
+                          "tertiary")) %>%
+  osmdata_sf()
 
 highways <- bbx %>%
   opq()%>%
@@ -32,8 +46,9 @@ ggplot() +
   geom_sf(data = highways$osm_lines,
           aes(color=highway),
           size = .4,
-          alpha = .65)+
-  theme_void()
+          alpha = .65)#+
+  #theme_void()
+
 
 
 streets <- bbx %>%
@@ -49,8 +64,8 @@ ggplot() +
   geom_sf(data = streets$osm_lines,
           aes(color=highway),
           size = .4,
-          alpha = .65)+
-  theme_void()
+          alpha = .65)#+
+  #theme_void()
 
 color_roads <- rgb(0.42,0.449,0.488)
 ggplot() +
@@ -61,11 +76,11 @@ ggplot() +
   geom_sf(data = highways$osm_lines,
           col = color_roads,
           size = .6,
-          alpha = .8)+
-  coord_sf(xlim = c(min_lon,max_lon),
-           ylim = c(min_lat,max_lat),
-           expand = FALSE)+
-  theme(legend.position = F) + theme_void()
+          alpha = .8)#+
+  # coord_sf(xlim = c(min_lon,max_lon),
+  #          ylim = c(min_lat,max_lat),
+  #          expand = FALSE)+
+ # theme(legend.position = F) #+ theme_void()
 
 
 #############################################
